@@ -27,9 +27,14 @@ namespace ImageFunctions
 
             string output = DateTime.Now.ToString("YYYY-mm-dd hh:mm:nn");
 
-            return imgname != null
+            //return output != null
+            //    ? (ActionResult)new OkObjectResult($"Hello, {output}")
+            //    : new BadRequestObjectResult("Please pass a name on the query string or in the request body");
+            return
+                output != null
                 ? (ActionResult)new OkObjectResult($"Hello, {output}")
-                : new BadRequestObjectResult("Please pass a name on the query string or in the request body");
+                : new BadRequestObjectResult("Please pass a name on the query string or in the request body")
+            ;
         }
     }
 }

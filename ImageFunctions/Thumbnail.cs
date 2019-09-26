@@ -182,8 +182,8 @@ namespace ImageFunctions
                     if (encoder != null)
                     {
                         Task<bool> storeImgInfoTask = SupportFuncs.StoreImgInfo(createdEvent.Url, input);
-                        bool storeResult = await storeImgInfoTask;
-                        if (!storeResult)
+                        storeImgInfoTask.Wait();
+                        if (!storeImgInfoTask.Result)
                         {
                             log.LogInformation($"Something went wrong trying to create ImgInfo.");
                         }

@@ -52,12 +52,14 @@ namespace ImageFunctions
                 CloudBlobContainer imgContainer = blobClient.GetContainerReference(imgContainerName);
                 CloudBlockBlob imgBlob = imgContainer.GetBlockBlobReference(imgname);
                 Task<bool> imgExistsTask = imgBlob.ExistsAsync();
+                imgExistsTask.Wait();
                 if (imgExistsTask.Result)
                 {
                     var input = new MemoryStream();
                     await imgBlob.DownloadToStreamAsync(input);
                     input.Position = 0;
                     Task<bool> storeImgInfoTask = SupportFuncs.StoreImgInfo(imgBlob.Uri.ToString(), input);
+                    storeImgInfoTask.Wait();
                     if (!storeImgInfoTask.Result)
                     {
                         output = "<no info for image (tried to create it but failed)>";

@@ -34,7 +34,8 @@ namespace ImageFunctions
             CloudBlobContainer container = blobClient.GetContainerReference(containerName);
             CloudBlockBlob  blob = container.GetBlockBlobReference(imgname);
 
-            if (await blob.ExistsAsync())
+            Task<bool> existsTask = blob.ExistsAsync();
+            if (existsTask.Result)
             {
                 using (MemoryStream stream = new MemoryStream())
                 {
@@ -46,19 +47,28 @@ namespace ImageFunctions
             }
             else
             {
-                output = "<no info for image>";
+                //Generate info for image, if possible.
+                string imgContainerName = Environment.GetEnvironmentVariable("IMAGES_CONTAINER_NAME");
+                CloudBlobContainer imgContainer = blobClient.GetContainerReference(imgContainerName);
+                CloudBlockBlob imgBlob = imgContainer.GetBlockBlobReference(imgname);
+                Task<bool> imgExistsTask = imgBlob.ExistsAsync();
+                if (imgExistsTask.Result)
+                {
+                    var input = new MemoryStream();
+                    await imgBlob.DownloadToStreamAsync(input);
+                    input.Position = 0;
+                    Task<bool> storeImgInfoTask = SupportFuncs.StoreImgInfo(imgBlob.Uri.ToString(), input);
+                    if (!storeImgInfoTask.Result)
+                    {
+                        output = "<no info for image (tried to create it but failed)>";
+                    }
+                }
+                else
+                {
+                    output = "<no info for image>";
+                }
             }
 
-            /*
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;*/
-
-            //string output = DateTime.Now.ToString("YYYY-mm-dd hh:mm:nn");
-
-            //return output != null
-            //    ? (ActionResult)new OkObjectResult($"Hello, {output}")
-            //    : new BadRequestObjectResult("Please pass a name on the query string or in the request body");
             return
                 output != null
                 ? (ActionResult)new OkObjectResult(output)

@@ -57,13 +57,13 @@ namespace ImageFunctions
                     await imgBlob.DownloadToStreamAsync(input);
                     input.Position = 0;
                     string res = await SupportFuncs.StoreImgInfo(imgBlob.Uri.ToString(), input);
-                    if (res != "")
+                    if (res == "")
                     {
                         output = "no info for image (tried to create it but failed)";
                     }
                     else
                     {
-                        output = "storeImgInfoTask returned false";
+                        output = res;
                     }
                 }
                 else

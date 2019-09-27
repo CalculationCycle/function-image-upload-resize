@@ -62,12 +62,16 @@ namespace ImageFunctions
                     storeImgInfoTask.Wait();
                     if (!storeImgInfoTask.Result)
                     {
-                        output = "<no info for image (tried to create it but failed)>";
+                        output = "no info for image (tried to create it but failed)";
+                    }
+                    else
+                    {
+                        output = "storeImgInfoTask.Result = false";
                     }
                 }
                 else
                 {
-                    output = "<no info for image>";
+                    output = "no info for image";
                 }
             }
 

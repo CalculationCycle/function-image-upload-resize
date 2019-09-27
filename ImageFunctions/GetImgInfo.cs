@@ -24,7 +24,7 @@ namespace ImageFunctions
 
             string imgname = req.Query["imgname"];
 
-            string output;
+            string output = "";
 
             string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
             CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse(connectionString);

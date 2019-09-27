@@ -71,8 +71,9 @@ namespace ImageFunctions
             var cloudBlob = new CloudBlob(uri);
             return cloudBlob.Name;
         }
-        public static async Task<bool> StoreImgInfo(string blobUrl, Stream input)
+        public async static Task<string> StoreImgInfo(string blobUrl, Stream input)
         {
+            string res = "";
             var imginfoContainerName = Environment.GetEnvironmentVariable("IMGINFO_CONTAINER_NAME");
             var storageAccount = CloudStorageAccount.Parse(BLOB_STORAGE_CONNECTION_STRING);
             var blobClient = storageAccount.CreateCloudBlobClient();
@@ -102,7 +103,10 @@ namespace ImageFunctions
                 output.Position = 0;
                 
                 await blockBlob.UploadFromStreamAsync(output);
-                return true;
+                output.Position = 0;
+                StreamReader reader = new StreamReader(output);
+                res = reader.ReadToEnd();
+                return res;
             }
         }
     }
@@ -163,7 +167,7 @@ namespace ImageFunctions
 
     public static class ImgInfo
     {
-         private static readonly string BLOB_STORAGE_CONNECTION_STRING = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+        private static readonly string BLOB_STORAGE_CONNECTION_STRING = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
 
         [FunctionName("ImgInfo")]
         public static async Task Run(
@@ -181,9 +185,9 @@ namespace ImageFunctions
 
                     if (encoder != null)
                     {
-                        Task<bool> storeImgInfoTask = SupportFuncs.StoreImgInfo(createdEvent.Url, input);
-                        storeImgInfoTask.Wait();
-                        if (!storeImgInfoTask.Result)
+                        Task<string> storeImgInfoTask = SupportFuncs.StoreImgInfo(createdEvent.Url, input);
+                        await storeImgInfoTask;
+                        if (storeImgInfoTask.Result == "")
                         {
                             log.LogInformation($"Something went wrong trying to create ImgInfo.");
                         }

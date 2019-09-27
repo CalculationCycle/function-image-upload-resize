@@ -51,22 +51,19 @@ namespace ImageFunctions
                 string imgContainerName = Environment.GetEnvironmentVariable("IMAGES_CONTAINER_NAME");
                 CloudBlobContainer imgContainer = blobClient.GetContainerReference(imgContainerName);
                 CloudBlockBlob imgBlob = imgContainer.GetBlockBlobReference(imgname);
-                Task<bool> imgExistsTask = imgBlob.ExistsAsync();
-                imgExistsTask.Wait();
-                if (imgExistsTask.Result)
+                if (await imgBlob.ExistsAsync())
                 {
                     var input = new MemoryStream();
                     await imgBlob.DownloadToStreamAsync(input);
                     input.Position = 0;
-                    Task<bool> storeImgInfoTask = SupportFuncs.StoreImgInfo(imgBlob.Uri.ToString(), input);
-                    storeImgInfoTask.Wait();
-                    if (!storeImgInfoTask.Result)
+                    string res = await SupportFuncs.StoreImgInfo(imgBlob.Uri.ToString(), input);
+                    if (res != "")
                     {
                         output = "no info for image (tried to create it but failed)";
                     }
                     else
                     {
-                        output = "storeImgInfoTask.Result = false";
+                        output = "storeImgInfoTask returned false";
                     }
                 }
                 else

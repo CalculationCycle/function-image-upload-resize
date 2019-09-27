@@ -24,8 +24,7 @@ namespace ImageFunctions
 
             string imgname = req.Query["imgname"];
 
-
-            string output = "apa (" + imgname + ")"; // + imgname.Substring(imgname.Length-1, -imgname.Length) + ")";
+            string output;
 
             string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
             CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
@@ -35,6 +34,7 @@ namespace ImageFunctions
             CloudBlockBlob  blob = container.GetBlockBlobReference(imgname);
 
             Task<bool> existsTask = blob.ExistsAsync();
+            existsTask.Wait();
             if (existsTask.Result)
             {
                 using (MemoryStream stream = new MemoryStream())
